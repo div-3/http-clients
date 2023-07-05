@@ -80,7 +80,6 @@ public class ToDoClient {
         HttpResponse newItemTyped = client.execute(createItemRequest);
         System.out.println(newItemTyped.getStatusLine());
 
-
         // PATCH mark task as completed
 
         // DELETE task by id
