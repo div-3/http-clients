@@ -22,39 +22,41 @@ import java.util.List;
 public class ToDoClientMy {
     public static String URL = "https://todo-app-sky.herokuapp.com";
     public static ObjectMapper mapper = new ObjectMapper();                   //Parse JSON bodies from responses
-    record ResponseBodyRecord(HttpResponse response, String body) {
-    }
+    record ResponseBodyRecord(HttpResponse response, String body) {}
 
 
     public static void main(String[] args) {
         HttpClient client = HttpClientBuilder.create().build();     //Http Client to send requests
 
         //1. GET запрос для получения списка задач
-        System.out.println("------------------------\nПолучение списка задач.\n------------------------");
+        System.out.println("\n------------------------\nGET. Получение списка задач.\n------------------------");
         ResponseBodyRecord rbr = getRequest(client);
-        System.out.println("GET response body: "
-                + getResponseEntityAsListOfToDoItems(rbr.body).toString());
+        System.out.println("GET response body: " + getBodyString(rbr));
 
         //2. DELETE запрос на URL = "https://todo-app-sky.herokuapp.com" очищает список задач
-        System.out.println("------------------------\nОчистка списка задач.\n------------------------");
+        System.out.println("\n------------------------\nDELETE. Очистка списка задач.\n------------------------");
         deleteRequest(client, null);    //При выполнении с задачей null очищается весь список задач
+        System.out.println("\n------------------------\nGET. Получение списка задач.\n------------------------");
         getRequest(client);
 
         //3. POST запрос (добавляет задачу в список)
-        System.out.println("------------------------\nДобавление задачи.\n------------------------");
+        System.out.println("\n------------------------\nPOST. Добавление задач:\n------------------------");
 
+        System.out.println("\n------------------------\nPOST. Задача 1:\n------------------------");
         ToDoItem newItem1 = new ToDoItem();
         newItem1.setTitle("Изучить HTTP");
         rbr = postRequest(client, newItem1);
         newItem1 = getToDoItemFromResponse(rbr.body);
         System.out.println(newItem1);
 
+        System.out.println("\n------------------------\nPOST. Задача 2:\n------------------------");
         ToDoItem newItem2 = new ToDoItem();
         newItem2.setTitle("Изучить SOAP");
         rbr = postRequest(client, newItem2);
         newItem2 = getToDoItemFromResponse(rbr.body);
         System.out.println(newItem2);
 
+        System.out.println("\n------------------------\nPOST. Задача 3:\n------------------------");
         ToDoItem newItem3 = new ToDoItem();
         newItem3.setTitle("Изучить REST");
         rbr = postRequest(client, newItem3);
@@ -62,29 +64,31 @@ public class ToDoClientMy {
         System.out.println(newItem3);
 
         //4. GET запрос всего списка задач
-        System.out.println("------------------------\nПолучение списка задач.\n------------------------");
+        System.out.println("\n------------------------\nGET. Получение списка задач.\n------------------------");
         rbr = getRequest(client);
-        System.out.println(rbr.body);
+        System.out.println(getBodyString(rbr));
 
         //5. PATCH запрос (помечает задачу выполненной)
-        System.out.println("------------------------\nЗадача выполнена.\n------------------------");
+        System.out.println("\n------------------------\nPATCH. Установка признака, что задача выполнена.\n------------------------");
         HttpPatch patchRequest;
         rbr = patchRequest(client, newItem1);
         newItem1 = getToDoItemFromResponse(rbr.body);
-        System.out.println(newItem1);
+        System.out.println("Задача 1: " + newItem1);
 
         //6. DELETE запрос одной задачи
-        System.out.println("------------------------\nУдаление одной задачи.\n------------------------");
+        System.out.println("\n------------------------\nDELETE. Удаление одной задачи (Задачи 1).\n------------------------");
 
-        rbr = deleteRequest(client, newItem1);    //При выполнении с задачей null очищается весь список задач
-//        System.out.println("DELETE response body: "
-//                + getResponseEntityAsListOfToDoItems(rbr.body).toString());
-        System.out.println("DELETE response body: "
-                + ((getResponseEntityAsListOfToDoItems(rbr.body) != null) ? getResponseEntityAsListOfToDoItems(rbr.body).toString() : "отсутствует"));
+        rbr = deleteRequest(client, newItem1);      //Удаление задачи 1
+        System.out.println("DELETE response body: " + getBodyString(rbr));
 
+        System.out.println("\n------------------------\nGET. Получение списка задач.\n------------------------");
         rbr = getRequest(client);
-        System.out.println("GET response body: "
-                + getResponseEntityAsListOfToDoItems(rbr.body).toString());
+        System.out.println("GET response body: " + getBodyString(rbr));
+    }
+
+    private static String getBodyString(ResponseBodyRecord rbr) {
+        return (getResponseEntityAsListOfToDoItems(rbr.body) != null) ?
+                    getResponseEntityAsListOfToDoItems(rbr.body).toString() : "отсутствует";
     }
 
     private static ToDoItem getToDoItemFromResponse(String body) {
@@ -96,31 +100,34 @@ public class ToDoClientMy {
     }
 
     private static ResponseBodyRecord postRequest(HttpClient client, ToDoItem newItem) {
-        HttpPost postRequest = new HttpPost(URL);
-        HttpResponse postResponse;
+        HttpPost request = new HttpPost(URL);
+        HttpResponse response;
         String body;
+        return runRequest(client, newItem, request);
+    }
+
+    private static <R> ResponseBodyRecord runRequest(HttpClient client, ToDoItem newItem, R request) {
+        String body;
+        HttpResponse response;
         try {
             body = getJsonAsStringWithSelectedToDoItem(newItem, new String[]{"title"});  //получение JSON с нужными полями класса
-
             System.out.println("POST body: " + body);
-
             StringEntity postBody = new StringEntity(body, ContentType.APPLICATION_JSON);        //Установка типа запроса для Entity. Иначе получается неправильная кодировка.
-            postRequest.setEntity(postBody);
-//            postRequest.addHeader("Content-Type", "application/json");    //Почему-то не сработала кодировка.
+            request.setEntity(postBody);
+//            request.addHeader("Content-Type", "application/json");    //Почему-то не сработала кодировка.
 
             //Настройка Header'ов
-            postRequest.addHeader("Username", "Ivan");
-            postRequest.addHeader("Accept-Encoding", "gzip, deflate, br");
+            request.addHeader("Username", "Ivan");
+            request.addHeader("Accept-Encoding", "gzip, deflate, br");
 
             //Отправка запроса
-            postResponse = client.execute(postRequest);
+            response = client.execute(request);
+            System.out.println("POST response status: " + response.getStatusLine());
 
-            System.out.println("POST response status: " + postResponse.getStatusLine());
-            return new ResponseBodyRecord(postResponse, EntityUtils.toString(postResponse.getEntity()));
+            return new ResponseBodyRecord(response, EntityUtils.toString(response.getEntity()));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
     }
 
     private static ResponseBodyRecord patchRequest(HttpClient client, ToDoItem item) {
@@ -149,7 +156,6 @@ public class ToDoClientMy {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
     }
 
     private static String getJsonAsStringWithSelectedToDoItem(ToDoItem item, String[] selectedItems) {
@@ -180,25 +186,25 @@ public class ToDoClientMy {
             System.out.println("DELETE response status: " + response.getStatusLine());
             HttpEntity entity = response.getEntity();
             if (entity != null) body = EntityUtils.toString(entity);
+            return new ResponseBodyRecord(response, body);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static ResponseBodyRecord getRequest(HttpClient client) {
+        HttpGet request = new HttpGet(URL);
+        HttpResponse response;
+        String body;
+        try {
+            response = client.execute(request);
+            System.out.println("GET response status: " + response.getStatusLine());
+            body = EntityUtils.toString(response.getEntity());
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         return new ResponseBodyRecord(response, body);
-    }
-
-    private static ResponseBodyRecord getRequest(HttpClient client) {
-        HttpGet getRequest = new HttpGet(URL);
-        HttpResponse getResponse;
-        String body;
-        try {
-            getResponse = client.execute(getRequest);
-            System.out.println("GET response status: " + getResponse.getStatusLine());
-            body = EntityUtils.toString(getResponse.getEntity());
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return new ResponseBodyRecord(getResponse, body);
     }
 
     private static List<ToDoItem> getResponseEntityAsListOfToDoItems(String body) {
