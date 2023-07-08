@@ -6,10 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPatch;
-import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.*;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -22,7 +19,9 @@ import java.util.List;
 public class ToDoClientMy {
     public static String URL = "https://todo-app-sky.herokuapp.com";
     public static ObjectMapper mapper = new ObjectMapper();                   //Parse JSON bodies from responses
-    record ResponseBodyRecord(HttpResponse response, String body) {}
+
+    record ResponseBodyRecord(HttpResponse response, String body) {
+    }
 
 
     public static void main(String[] args) {
@@ -88,7 +87,7 @@ public class ToDoClientMy {
 
     private static String getBodyString(ResponseBodyRecord rbr) {
         return (getResponseEntityAsListOfToDoItems(rbr.body) != null) ?
-                    getResponseEntityAsListOfToDoItems(rbr.body).toString() : "отсутствует";
+                getResponseEntityAsListOfToDoItems(rbr.body).toString() : "отсутствует";
     }
 
     private static ToDoItem getToDoItemFromResponse(String body) {
@@ -99,21 +98,17 @@ public class ToDoClientMy {
         }
     }
 
-    private static ResponseBodyRecord postRequest(HttpClient client, ToDoItem newItem) {
+    private static ResponseBodyRecord postRequest(HttpClient client, ToDoItem item) {
         HttpPost request = new HttpPost(URL);
         HttpResponse response;
         String body;
-        return runRequest(client, newItem, request);
-    }
-
-    private static <R> ResponseBodyRecord runRequest(HttpClient client, ToDoItem newItem, R request) {
-        String body;
-        HttpResponse response;
         try {
-            body = getJsonAsStringWithSelectedToDoItem(newItem, new String[]{"title"});  //получение JSON с нужными полями класса
+            body = getJsonAsStringWithSelectedToDoItem(item, new String[]{"title"});  //получение JSON с нужными полями класса
+
             System.out.println("POST body: " + body);
-            StringEntity postBody = new StringEntity(body, ContentType.APPLICATION_JSON);        //Установка типа запроса для Entity. Иначе получается неправильная кодировка.
-            request.setEntity(postBody);
+
+            StringEntity patchBody = new StringEntity(body, ContentType.APPLICATION_JSON);        //Установка типа запроса для Entity. Иначе получается неправильная кодировка.
+            request.setEntity(patchBody);
 //            request.addHeader("Content-Type", "application/json");    //Почему-то не сработала кодировка.
 
             //Настройка Header'ов
@@ -122,8 +117,8 @@ public class ToDoClientMy {
 
             //Отправка запроса
             response = client.execute(request);
-            System.out.println("POST response status: " + response.getStatusLine());
 
+            System.out.println("POST response status: " + response.getStatusLine());
             return new ResponseBodyRecord(response, EntityUtils.toString(response.getEntity()));
         } catch (IOException e) {
             throw new RuntimeException(e);
