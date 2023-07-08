@@ -1,5 +1,7 @@
 package ru.inno.todo.apache;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.Objects;
 
 public class ToDoItem {
