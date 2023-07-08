@@ -3,6 +3,7 @@ package ru.inno.todo.apache;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
@@ -20,16 +21,13 @@ import java.util.List;
 
 public class ToDoClientMy {
     public static String URL = "https://todo-app-sky.herokuapp.com";
-    record ResponseBodyRecord(HttpResponse response, String body){}
     public static ObjectMapper mapper = new ObjectMapper();                   //Parse JSON bodies from responses
+    record ResponseBodyRecord(HttpResponse response, String body) {
+    }
 
 
     public static void main(String[] args) {
-
         HttpClient client = HttpClientBuilder.create().build();     //Http Client to send requests
-
-
-        //API testing:
 
         //1. GET запрос для получения списка задач
         System.out.println("------------------------\nПолучение списка задач.\n------------------------");
@@ -39,7 +37,6 @@ public class ToDoClientMy {
 
         //2. DELETE запрос на URL = "https://todo-app-sky.herokuapp.com" очищает список задач
         System.out.println("------------------------\nОчистка списка задач.\n------------------------");
-
         deleteRequest(client, null);    //При выполнении с задачей null очищается весь список задач
         getRequest(client);
 
@@ -79,7 +76,12 @@ public class ToDoClientMy {
         //6. DELETE запрос одной задачи
         System.out.println("------------------------\nУдаление одной задачи.\n------------------------");
 
-        deleteRequest(client, newItem1);    //При выполнении с задачей null очищается весь список задач
+        rbr = deleteRequest(client, newItem1);    //При выполнении с задачей null очищается весь список задач
+//        System.out.println("DELETE response body: "
+//                + getResponseEntityAsListOfToDoItems(rbr.body).toString());
+        System.out.println("DELETE response body: "
+                + ((getResponseEntityAsListOfToDoItems(rbr.body) != null) ? getResponseEntityAsListOfToDoItems(rbr.body).toString() : "отсутствует"));
+
         rbr = getRequest(client);
         System.out.println("GET response body: "
                 + getResponseEntityAsListOfToDoItems(rbr.body).toString());
@@ -150,7 +152,7 @@ public class ToDoClientMy {
 
     }
 
-    private static String getJsonAsStringWithSelectedToDoItem(ToDoItem item, String[] selectedItems){
+    private static String getJsonAsStringWithSelectedToDoItem(ToDoItem item, String[] selectedItems) {
         ObjectNode rootNode = mapper.valueToTree(item);         //Получение всего дерева JSON из item
         ObjectNode selectedNode = mapper.createObjectNode();    //Создание пустого нода для вывода
         for (String s : selectedItems) {
@@ -163,22 +165,25 @@ public class ToDoClientMy {
         }
     }
 
-    private static HttpResponse deleteRequest(HttpClient client, ToDoItem item) {
+    private static ResponseBodyRecord deleteRequest(HttpClient client, ToDoItem item) {
         HttpDelete request;
-        if (item == null){
+        if (item == null) {
             request = new HttpDelete(URL);
-        }else {
+        } else {
             request = new HttpDelete(URL + item.getUrl());
         }
 
+        String body = null;
         HttpResponse response;
         try {
             response = client.execute(request);
             System.out.println("DELETE response status: " + response.getStatusLine());
+            HttpEntity entity = response.getEntity();
+            if (entity != null) body = EntityUtils.toString(entity);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return response;
+        return new ResponseBodyRecord(response, body);
     }
 
     private static ResponseBodyRecord getRequest(HttpClient client) {
@@ -197,6 +202,7 @@ public class ToDoClientMy {
     }
 
     private static List<ToDoItem> getResponseEntityAsListOfToDoItems(String body) {
+        if (body == null) return null;
         List<ToDoItem> listToDo = new ArrayList<>();
         try {
             listToDo = mapper.readValue(body, List.class);
