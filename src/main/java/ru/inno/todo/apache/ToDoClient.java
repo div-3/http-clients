@@ -1,7 +1,8 @@
 package ru.inno.todo.apache;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.ReferenceType;
+import model.CreateToDO;
+import model.ToDoItem;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;

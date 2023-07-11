@@ -3,6 +3,7 @@ package ru.inno.todo.apache;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import model.ToDoItem;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -75,9 +76,9 @@ public class ToDoClientMy {
         System.out.println("Задача 1: " + newItem1);
 
         //6. DELETE запрос одной задачи
-        System.out.println("\n------------------------\nDELETE. Удаление одной задачи (Задачи 1).\n------------------------");
+        System.out.println("\n------------------------\nDELETE. Удаление одной задачи (Задачи 2).\n------------------------");
 
-        rbr = deleteRequest(client, newItem1);      //Удаление задачи 1
+        rbr = deleteRequest(client, newItem2);      //Удаление задачи 2
         System.out.println("DELETE response body: " + getBodyString(rbr));
 
         System.out.println("\n------------------------\nGET. Получение списка задач.\n------------------------");

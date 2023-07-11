@@ -1,6 +1,4 @@
-package ru.inno.todo.apache;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+package model;
 
 import java.util.Objects;
 
