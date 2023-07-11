@@ -10,13 +10,13 @@ public interface ToDoClient {
 
     List<ToDoItem> getAll() throws IOException;
 
-    ToDoItem getById(int id);
+    ToDoItem getById(int id) throws IOException;
 
     ToDoItem create(CreateToDo createToDo) throws IOException;
 
     void deleteById(int id);
 
-    ToDoItem renameById(int id, String newName);
+    ToDoItem renameById(int id, String newName) throws IOException;
 
     ToDoItem markCompleted(int id, boolean completed);
 

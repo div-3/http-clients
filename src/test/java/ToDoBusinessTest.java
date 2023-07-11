@@ -15,7 +15,7 @@ public class ToDoBusinessTest {
     private ToDoClient client;
 
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws IOException {
         client = new ToDoClientApache("https://todo-app-sky.herokuapp.com");
     }
 
@@ -44,6 +44,19 @@ public class ToDoBusinessTest {
         // проверить еще и по id
         ToDoItem single = client.getById(newItem.getId());
         assertEquals(title, single.getTitle());
+    }
+
+    @Test
+    @DisplayName("Проверка, что задача переименовывается")
+    public void shouldRenameItemById() throws IOException {
+        String title1 = "Задача 1";
+        String titleExpected = "Задача 2";
+        CreateToDo createToDo = new CreateToDo();
+        createToDo.setTitle(title1);
+        ToDoItem item = client.create(createToDo);
+        assertEquals(title1, client.getById(item.getId()).getTitle());
+        client.renameById(item.getId(), titleExpected);
+        assertEquals(titleExpected, client.getById(item.getId()).getTitle());
     }
 
 }
