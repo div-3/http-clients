@@ -2,10 +2,10 @@ package model;
 
 import java.util.Objects;
 
-public class CreateToDO {
+public class CreateToDo {
     private String title;
 
-    public CreateToDO() {
+    public CreateToDo() {
     }
 
     public String getTitle() {
@@ -19,7 +19,7 @@ public class CreateToDO {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof CreateToDO that)) return false;
+        if (!(o instanceof CreateToDo that)) return false;
         return Objects.equals(getTitle(), that.getTitle());
     }
 

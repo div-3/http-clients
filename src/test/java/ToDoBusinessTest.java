@@ -1,10 +1,10 @@
+import client.ToDoClient;
+import model.CreateToDo;
+import model.ToDoItem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import ru.inno.todo.ToDoClient;
 import ru.inno.todo.apache.ToDoClientApache;
-import ru.inno.todo.model.CreateToDo;
-import ru.inno.todo.model.ToDoItem;
 
 import java.io.IOException;
 import java.util.List;

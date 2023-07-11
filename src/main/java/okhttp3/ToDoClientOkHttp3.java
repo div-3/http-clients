@@ -2,9 +2,9 @@ package okhttp3;
 
 
 
+import client.ToDoClient;
+import model.CreateToDo;
 import model.ToDoItem;
-import ru.inno.todo.apache.ToDoClient;
-
 import java.io.IOException;
 import java.util.List;
 

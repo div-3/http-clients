@@ -1,7 +1,9 @@
 package ru.inno.todo.apache;
 
+import client.ToDoClient;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import model.CreateToDo;
 import model.ToDoItem;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -11,9 +13,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
-import ru.inno.todo.ToDoClient;
-import ru.inno.todo.model.CreateToDo;
-import ru.inno.todo.model.ToDoItem;
 
 import java.io.IOException;
 import java.util.List;

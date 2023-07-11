@@ -1,7 +1,7 @@
-
+package client;
 
 import model.ToDoItem;
-import model.CreateToDO;
+import model.CreateToDo;
 
 import java.io.IOException;
 import java.util.List;
@@ -12,7 +12,7 @@ public interface ToDoClient {
 
     ToDoItem getById(int id);
 
-    ToDoItem create(CreateToDO createToDo) throws IOException;
+    ToDoItem create(CreateToDo createToDo) throws IOException;
 
     void deleteById(int id);
 

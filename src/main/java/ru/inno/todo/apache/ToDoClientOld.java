@@ -1,7 +1,7 @@
 package ru.inno.todo.apache;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import model.CreateToDO;
+import model.CreateToDo;
 import model.ToDoItem;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -15,7 +15,7 @@ import org.apache.http.util.EntityUtils;
 import java.io.IOException;
 import java.util.List;
 
-public class ToDoClient {
+public class ToDoClientOld {
 
     public static String URL = "https://todo-app-sky.herokuapp.com";
 
@@ -71,7 +71,7 @@ public class ToDoClient {
 
         // POST create item (typed)
         // Step 1. Create object
-        CreateToDO itemToCreate = new CreateToDO();
+        CreateToDo itemToCreate = new CreateToDo();
         itemToCreate.setTitle("my new task");
         // Step 2. Convert to string
         String s = mapper.writeValueAsString(itemToCreate);
