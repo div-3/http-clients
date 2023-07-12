@@ -18,7 +18,7 @@ public interface ToDoClient {
 
     ToDoItem renameById(int id, String newName) throws IOException;
 
-    ToDoItem markCompleted(int id, boolean completed);
+    ToDoItem markCompleted(int id, boolean completed) throws IOException;
 
     void deleteAll() throws IOException;
 }
