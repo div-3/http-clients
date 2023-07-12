@@ -6,6 +6,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import ru.inno.todo.apache.ToDoClientApache;
 
 import java.io.IOException;
@@ -27,9 +29,10 @@ public class ToDoBusinessTest {
     7. Получение одной задачи по id +
     8. Создание дубликата задачи +
     9. Добавление 50 задач +
+    10. Создание задачи пустой задачи ("", " ", null)
 
     Негативные:
-    1. Создание пустой задачи ("", " ", null, скрипт, без тела)
+    1. Отказ в создание задачи (скрипт, без тела)
     2. Переименование задачи на недопустимое значение ("", " ", null, скрипт, без тела)
     3. Переименование задачи с неправильным id (добавочный URL: 0, -1, maxInteger, double, boolean, String, "", " ")
     3. Отметка задачи выполненной с недопустимым телом ("", " ", null, скрипт, без тела)
@@ -142,6 +145,7 @@ public class ToDoBusinessTest {
 
     @Test
     @Tag("Positive")
+    @Tag("Destructive")
     @DisplayName("5. Удаление всех задач")
     public void shouldDeleteAll() throws IOException {
         //Создаём 5 задач
@@ -251,6 +255,53 @@ public class ToDoBusinessTest {
             client.deleteById(listCreated.get(i).getId());
         }
     }
+
+    @ParameterizedTest(name = "Строка названия = {0}")
+    @MethodSource("getEmptyTitle")
+    @Tag("Positive")
+    @DisplayName("10. Создание задачи пустой задачи (\"\", \" \", \"null\")")
+    public void shouldCreateEmptyTask(String emptyTitle) throws IOException {
+        // получить список задач
+        List<ToDoItem> listBefore = client.getAll();
+        CreateToDo createToDo = new CreateToDo();
+        createToDo.setTitle(emptyTitle);
+        ToDoItem item = client.create(createToDo);
+
+        // проверить, что задача отображается в списке
+        assertFalse(item.getUrl().isBlank());
+        assertFalse(item.isCompleted());
+        assertTrue(item.getId() > 0);
+        assertEquals(emptyTitle, item.getTitle());
+        // TODO: bug report. Oreder is null
+        assertEquals(0, item.getOrder());
+        // задач стало на 1 больше
+        List<ToDoItem> listAfter = client.getAll();
+        assertEquals(1, listAfter.size() - listBefore.size());
+
+        // проверить еще и по id
+        ToDoItem single = client.getById(item.getId());
+        assertEquals(emptyTitle, single.getTitle());
+
+        //Очистка от тестовых данных
+        client.deleteById(item.getId());
+    }
+
+    private static String[] getEmptyTitle(){
+        return new String[] {"", " ", "null"};
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------
+    //Негативные тесты
+    //-----------------------------------------------------------------------------------------------------------------
+
+    //   1. Создание пустой задачи ("", " ", null, скрипт, без тела)
+    @ParameterizedTest(name = "Номер заказа = {0}")
+    @MethodSource("getWrongOrders")
+    @Tag("Negative")
+    @DisplayName("1н. Создание пустой задачи (\"\", \" \", null, скрипт, без тела)")
+    public void tes(int i){}
+
+
 
     private ToDoItem createTestTask1() throws IOException {
         // создать задачу
