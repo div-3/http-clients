@@ -33,15 +33,8 @@ public class ToDoBusinessTest {
     10. Создание задачи пустой задачи ("", " ", null)
 
     Негативные:
-    1. Отказ в создание задачи (скрипт, без тела)
-    2. Переименование задачи на недопустимое значение ("", " ", null, скрипт, без тела)
-    3. Переименование задачи с неправильным id (добавочный URL: 0, -1, maxInteger, double, boolean, String, "", " ")
-    3. Отметка задачи выполненной с недопустимым телом ("", " ", null, скрипт, без тела)
-    4. Удаление задачи с неправильным id (добавочный URL: 0, -1, maxInteger, double, boolean, String, "", " ")
-    5. Повторное удаление задачи по id
-    6. Получение всего списка задач с неправильными параметрами (присутствует тело в запросе GET)
-    7. Получение одной записи с неправильным id (добавочный URL: 0, -1, maxInteger, double, boolean, String, "", " ")
-    8. Получение одной задачи по id с неправильными параметрами (присутствует тело в запросе GET)
+    1н. Повторное удаление задачи по id
+
     */
     private ToDoClient client;
     private final String TEST_TASK_1_TITLE = "Задача 1";
@@ -109,14 +102,14 @@ public class ToDoBusinessTest {
         assertFalse(item.isCompleted());
 
         //Проверить, что задача с нужным именем помечена выполненной completed = true
-        client.markCompleted(item.getId(),true);
+        client.markCompleted(item.getId(), true);
 
         item = client.getById(item.getId());
         assertEquals(TEST_TASK_1_TITLE, item.getTitle());
         assertTrue(item.isCompleted());
 
         //Проверить, что задача с нужным именем помечена выполненной completed = false
-        client.markCompleted(item.getId(),false);
+        client.markCompleted(item.getId(), false);
 
         item = client.getById(item.getId());
         assertEquals(TEST_TASK_1_TITLE, item.getTitle());
@@ -125,6 +118,7 @@ public class ToDoBusinessTest {
         //Очистка от тестовых данных
         deleteTestTask1();
     }
+
     @Test
     @Tag("Positive")
     @DisplayName("4. Удаление одной задачи по id")
@@ -135,6 +129,7 @@ public class ToDoBusinessTest {
         for (ToDoItem i : listBefore) {
             System.out.println(i.getTitle());
         }
+
         deleteTestTask1();
         List<ToDoItem> listAfter = client.getAll();
         for (ToDoItem i : listAfter) {
@@ -287,21 +282,21 @@ public class ToDoBusinessTest {
         client.deleteById(item.getId());
     }
 
-    private static String[] getEmptyTitle(){
-        return new String[] {"", " ", "null"};
+    private static String[] getEmptyTitle() {
+        return new String[]{"", " ", "null"};
     }
 
     //-----------------------------------------------------------------------------------------------------------------
     //Негативные тесты
     //-----------------------------------------------------------------------------------------------------------------
 
-    //   1. Создание пустой задачи ("", " ", null, скрипт, без тела)
     @ParameterizedTest(name = "Номер заказа = {0}")
     @MethodSource("getWrongOrders")
     @Tag("Negative")
-    @DisplayName("1н. Создание пустой задачи (\"\", \" \", null, скрипт, без тела)")
-    public void tes(int i){}
+    @DisplayName("1н. Отказ в создание задачи (скрипт, без тела)")
+    public void tes(int i) {
 
+    }
 
 
     private ToDoItem createTestTask1() throws IOException {

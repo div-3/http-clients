@@ -2,6 +2,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -9,7 +10,10 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import ru.inno.todo.apache.MyRequestInterceptor;
 import ru.inno.todo.apache.MyResponseInterceptor;
 
@@ -18,6 +22,18 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/*  Негативные тесты:
+    1. Отказ в создание задачи (скрипт, без тела)
+    2. Переименование задачи на недопустимое значение (скрипт, без тела)
+    3. Переименование задачи с неправильным id (добавочный URL: 0, -1, maxInteger, double, boolean, String, "") +
+    4. Отметка задачи выполненной с недопустимым телом ("", " ", null, скрипт, без тела)
+    5. Удаление задачи с неправильным id (добавочный URL: 0, -1, maxInteger, double, boolean, String, "", " ")
+    6. Получение всего списка задач с неправильными параметрами (присутствует тело в запросе GET)
+    7. Получение одной записи с неправильным id (добавочный URL: 0, -1, maxInteger, double, boolean, String, "", " ")
+    8. Получение одной задачи по id с неправильными параметрами (присутствует тело в запросе GET)
+    */
+
+@DisplayName("Тесты контракта: ")
 public class ToDoContractTest {
     private static final String URL = "https://todo-app-sky.herokuapp.com";
 
@@ -95,6 +111,36 @@ public class ToDoContractTest {
         assertEquals(1, response.getHeaders("Content-Length").length);
         assertEquals("0", response.getHeaders("Content-Length")[0].getValue());
     }
+
+    @DisplayName("3.1. Переименование задачи с неправильным id (SC 400)")
+    @Tag("Negative")
+    @ParameterizedTest(name = "Добавочный URL = {0}")
+    @MethodSource("getWrongIdSc400")
+    public void shouldNotPatchItemWithWrongIdStatus400(String id) throws IOException {
+        HttpPatch httpPatch = new HttpPatch(URL + "/" + id);
+        HttpResponse response = client.execute(httpPatch);
+        assertEquals(400, response.getStatusLine().getStatusCode());
+    }
+
+    @DisplayName("3.2. Переименование задачи с неправильным id (SC 404)")
+    @Tag("Negative")
+    @ParameterizedTest(name = "Добавочный URL = {0}")
+    @MethodSource("getWrongIdSc404")
+    public void shouldNotPatchItemWithWrongIdStatus404(String id) throws IOException {
+        HttpPatch httpPatch = new HttpPatch(URL + "/" + id);
+        HttpResponse response = client.execute(httpPatch);
+        assertEquals(404, response.getStatusLine().getStatusCode());
+    }
+
+    private static String[] getWrongIdSc400() {
+        Integer max = Integer.MAX_VALUE;
+        return new String[]{"0", "-1", max.toString(), "3.14", "true", "false", "test", "-", "_", ".", "~", "'", ":"};
+    }
+
+    private static String[] getWrongIdSc404() {
+        return new String[]{"", "?", "*", "(", ")", ";", "@", "&", "=", "+", "$", ",", "/", "?", "#"};
+    }
+
 
     private HttpResponse createNewTask() throws IOException {
         // Запрос
