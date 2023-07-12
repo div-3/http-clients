@@ -16,6 +16,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@DisplayName("Тесты бизнес-логики:")
 public class ToDoBusinessTest {
 
     /*Тесты на бизнес-логику:
