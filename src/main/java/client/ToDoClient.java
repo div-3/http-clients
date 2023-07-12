@@ -14,7 +14,7 @@ public interface ToDoClient {
 
     ToDoItem create(CreateToDo createToDo) throws IOException;
 
-    void deleteById(int id);
+    void deleteById(int id) throws IOException;
 
     ToDoItem renameById(int id, String newName) throws IOException;
 

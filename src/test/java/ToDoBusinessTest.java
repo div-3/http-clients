@@ -1,6 +1,7 @@
 import client.ToDoClient;
 import model.CreateToDo;
 import model.ToDoItem;
+import org.apache.http.util.EntityUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -8,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import ru.inno.todo.apache.ToDoClientApache;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -16,15 +18,14 @@ public class ToDoBusinessTest {
 
     /*Тесты на бизнес-логику:
     Позитивные:
-    1. Создание задачи
-    2. Переименование задачи
-    3. Отметка задачи выполненной
-    4. Снятие отметки выполнено
-    5. Удаление одной задачи по id
-    6. Удаление всех задач
-    7. Получение всего списка задач
-    8. Получение одной задачи по id
-    9. Создание дубликата задачи
+    1. Создание задачи +
+    2. Переименование задачи +
+    3. Отметка задачи выполненной и невыполненной +
+    4. Удаление одной задачи по id -
+    5. Удаление всех задач
+    6. Получение всего списка задач
+    7. Получение одной задачи по id
+    8. Создание дубликата задачи
 
     Негативные:
     1. Создание пустой задачи ("", " ", null, скрипт, без тела)
@@ -39,6 +40,7 @@ public class ToDoBusinessTest {
     */
     private ToDoClient client;
     private final String TEST_TASK_1_TITLE = "Задача 1";
+    private int testTask1Id;
 
     @BeforeEach
     public void setUp() throws IOException {
@@ -47,7 +49,7 @@ public class ToDoBusinessTest {
 
     @Test
     @Tag("Positive")
-    @DisplayName("Проверяем, что задача создается")
+    @DisplayName("1. Создание задачи")
     //    1. Создание задачи
     public void shouldCreateTask() throws IOException {
         // получить список задач
@@ -70,13 +72,12 @@ public class ToDoBusinessTest {
         assertEquals(TEST_TASK_1_TITLE, single.getTitle());
 
         //Очистка от тестовых данных
-        client.deleteById(single.getId());
+        deleteTestTask1();
     }
 
     @Test
     @Tag("Positive")
-    @DisplayName("Проверка, что задача переименовывается")
-    //    2. Переименование задачи
+    @DisplayName("2. Переименование задачи")
     public void shouldRenameItemById() throws IOException {
         ToDoItem item = createTestTask1();
 
@@ -89,13 +90,12 @@ public class ToDoBusinessTest {
         assertEquals(titleExpected, client.getById(item.getId()).getTitle());
 
         //Очистка от тестовых данных
-        client.deleteById(item.getId());
+        deleteTestTask1();
     }
 
     @Test
     @Tag("Positive")
-    @DisplayName("Проверка, что задача отмечается выполненной")
-    //    3. Отметка задачи выполненной
+    @DisplayName("3. Отметка задачи выполненной и невыполненной")
     public void shouldMarkItemDoneById() throws IOException {
         ToDoItem item = createTestTask1();
 
@@ -110,15 +110,71 @@ public class ToDoBusinessTest {
         assertEquals(TEST_TASK_1_TITLE, item.getTitle());
         assertTrue(item.isCompleted());
 
+        //Проверить, что задача с нужным именем помечена выполненной completed = false
+        client.markCompleted(item.getId(),false);
+
+        item = client.getById(item.getId());
+        assertEquals(TEST_TASK_1_TITLE, item.getTitle());
+        assertFalse(item.isCompleted());
+
         //Очистка от тестовых данных
-        client.deleteById(item.getId());
+        deleteTestTask1();
+    }
+    @Test
+    @Tag("Positive")
+    @DisplayName("4. Удаление одной задачи по id")
+    public void shouldDeleteItemByID() throws IOException {
+        // получить список задач
+        ToDoItem item = createTestTask1();
+        List<ToDoItem> listBefore = client.getAll();
+        for (ToDoItem i : listBefore) {
+            System.out.println(i.getTitle());
+        }
+        deleteTestTask1();
+        List<ToDoItem> listAfter = client.getAll();
+        for (ToDoItem i : listAfter) {
+            System.out.println(i.getTitle());
+        }
+
+        assertEquals(1, listBefore.size() - listAfter.size());
+    }
+
+    @Test
+    @Tag("Positive")
+    @DisplayName("5. Удаление всех задач")
+    public void shouldDeleteAll() throws IOException {
+        //Создаём 5 задач
+        ArrayList<ToDoItem> listBefore = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            CreateToDo createToDo = new CreateToDo();
+            createToDo.setTitle("Задача " + i);
+            listBefore.add(i, client.create(createToDo));
+            assertEquals(listBefore.get(i).getTitle(), client.getById(listBefore.get(i).getId()).getTitle());
+        }
+
+        //Удаление всех задач
+        client.deleteAll();
+
+        //Проверка, что все задачи удалены
+        assertEquals(0, client.getAll().size());
+
+        //Проверка, что каждая задача удалена
+        for (int i = 0; i < 5; i++) {
+            assertNull(client.getById(listBefore.get(i).getId()));
+        }
     }
 
     private ToDoItem createTestTask1() throws IOException {
         // создать задачу
         CreateToDo todo = new CreateToDo();
         todo.setTitle(TEST_TASK_1_TITLE);
-        return client.create(todo);
+        ToDoItem item = client.create(todo);
+        testTask1Id = item.getId();
+        return item;
+    }
+
+    private void deleteTestTask1() throws IOException {
+        client.deleteById(testTask1Id);
     }
 
 }

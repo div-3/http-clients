@@ -51,7 +51,9 @@ public class ToDoClientApache implements ToDoClient {
         HttpGet request = new HttpGet(URL + "/" + id);
         request.addHeader("Content-Type", "application/json; charset=utf-8");    //Почему-то не сработала кодировка.
         HttpResponse response = httpClient.execute(request);
-
+        if (response.getStatusLine().getStatusCode() == 404){
+            return null;
+        }
         return mapper.readValue(EntityUtils.toString(response.getEntity()), ToDoItem.class);
     }
 
@@ -67,8 +69,9 @@ public class ToDoClientApache implements ToDoClient {
     }
 
     @Override
-    public void deleteById(int id) {
+    public void deleteById(int id) throws IOException {
         HttpDelete request = new HttpDelete(URL + "/" + id);
+        httpClient.execute(request);
     }
 
     @Override
