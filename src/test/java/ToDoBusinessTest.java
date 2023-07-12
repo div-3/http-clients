@@ -21,11 +21,12 @@ public class ToDoBusinessTest {
     1. Создание задачи +
     2. Переименование задачи +
     3. Отметка задачи выполненной и невыполненной +
-    4. Удаление одной задачи по id -
-    5. Удаление всех задач
-    6. Получение всего списка задач
-    7. Получение одной задачи по id
-    8. Создание дубликата задачи
+    4. Удаление одной задачи по id +
+    5. Удаление всех задач +
+    6. Получение всего списка задач +
+    7. Получение одной задачи по id +
+    8. Создание дубликата задачи +
+    9. Добавление 50 задач +
 
     Негативные:
     1. Создание пустой задачи ("", " ", null, скрипт, без тела)
@@ -161,6 +162,93 @@ public class ToDoBusinessTest {
         //Проверка, что каждая задача удалена
         for (int i = 0; i < 5; i++) {
             assertNull(client.getById(listBefore.get(i).getId()));
+        }
+    }
+
+    @Test
+    @Tag("Positive")
+    @DisplayName("6. Получение всего списка задач")
+    public void shouldGetAll() throws IOException {
+        //Создаём 5 задач
+        List<ToDoItem> listStart = client.getAll();
+        List<ToDoItem> listCreated = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            CreateToDo createToDo = new CreateToDo();
+            createToDo.setTitle("Задача " + i);
+            listCreated.add(i, client.create(createToDo));
+        }
+
+        //Получение списка задач
+        List<ToDoItem> listAsIs = client.getAll();
+
+        //Проверка, что размеры массивов одинаковые
+        assertEquals(5, listAsIs.size() - listStart.size());
+
+        //Проверка, что все элементы массива созданных задач находятся в массиве полученных задач
+        assertTrue(listAsIs.containsAll(listCreated));
+
+        //Удаление всех задач
+        for (int i = 0; i < listCreated.size(); i++) {
+            client.deleteById(listCreated.get(i).getId());
+        }
+    }
+
+    @Test
+    @Tag("Positive")
+    @DisplayName("7. Получение одной задачи по id ")
+    public void shouldGetItemByID() throws IOException {
+        createTestTask1();
+        ToDoItem item = client.getById(testTask1Id);
+
+        // проверить, что задача отображается в списке
+        assertFalse(item.getUrl().isBlank());
+        assertFalse(item.isCompleted());
+        assertTrue(item.getId() > 0);
+        assertEquals(TEST_TASK_1_TITLE, item.getTitle());
+        // TODO: bug report. Oreder is null
+        assertEquals(0, item.getOrder());
+    }
+
+    @Test
+    @Tag("Positive")
+    @DisplayName("8. Создание дубликата задачи")
+    public void shouldCreateDuplicateItem() throws IOException {
+        ToDoItem item1 = createTestTask1();
+        ToDoItem item2 = createTestTask1();
+
+        // проверить, что у задачи 1 и задачи 2 совпадают: title, order, completed
+        assertNotEquals(item1.getId(), item2.getId());
+        assertNotEquals(item1.getUrl(), item2.getUrl());
+        assertEquals(item1.getTitle(), item2.getTitle());
+        assertEquals(item1.getOrder(), item2.getOrder());
+        assertEquals(item1.isCompleted(), item2.isCompleted());
+    }
+
+    @Test
+    @Tag("Positive")
+    @DisplayName("9. Добавление 50 задач")
+    public void shouldCreate50Item() throws IOException {
+        //Создаём 50 задач
+        List<ToDoItem> listStart = client.getAll();
+        List<ToDoItem> listCreated = new ArrayList<>();
+        for (int i = 0; i < 50; i++) {
+            CreateToDo createToDo = new CreateToDo();
+            createToDo.setTitle("Задача " + i);
+            listCreated.add(i, client.create(createToDo));
+        }
+
+        //Получение списка задач
+        List<ToDoItem> listAsIs = client.getAll();
+
+        //Проверка, что размеры массивов одинаковые
+        assertEquals(50, listAsIs.size() - listStart.size());
+
+        //Проверка, что все элементы массива созданных задач находятся в массиве полученных задач
+        assertTrue(listAsIs.containsAll(listCreated));
+
+        //Удаление всех задач
+        for (int i = 0; i < listCreated.size(); i++) {
+            client.deleteById(listCreated.get(i).getId());
         }
     }
 
