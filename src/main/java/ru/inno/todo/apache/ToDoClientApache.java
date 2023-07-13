@@ -28,7 +28,7 @@ public class ToDoClientApache implements ToDoClient {
     private final HttpClient httpClient;
     private final ObjectMapper mapper;
 
-    public ToDoClientApache(String URL) throws IOException {
+    public ToDoClientApache(String URL) {
         this.URL = URL;
         this.httpClient = HttpClientBuilder
                 .create()

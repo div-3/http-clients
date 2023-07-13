@@ -23,14 +23,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /*  Негативные тесты:
-    1. Отказ в создание задачи (скрипт, без тела)
-    2. Переименование задачи на недопустимое значение (скрипт, без тела)
-    3. Переименование задачи с неправильным id (добавочный URL: 0, -1, maxInteger, double, boolean, String, "") +
-    4. Отметка задачи выполненной с недопустимым телом ("", " ", null, скрипт, без тела)
-    5. Удаление задачи с неправильным id (добавочный URL: 0, -1, maxInteger, double, boolean, String, "", " ")
-    6. Получение всего списка задач с неправильными параметрами (присутствует тело в запросе GET)
-    7. Получение одной записи с неправильным id (добавочный URL: 0, -1, maxInteger, double, boolean, String, "", " ")
-    8. Получение одной задачи по id с неправильными параметрами (присутствует тело в запросе GET)
+    1н. Отказ в создание задачи (скрипт, без тела)
+    2н. Переименование задачи на недопустимое значение (скрипт, без тела)
+    3н. Переименование задачи с неправильным id (добавочный URL: 0, -1, maxInteger, double, boolean, String, "") +
+    4н. Отметка задачи выполненной с недопустимым телом ("", " ", null, скрипт, без тела)
+    5н. Удаление задачи с неправильным id (добавочный URL: 0, -1, maxInteger, double, boolean, String, "", " ")
+    6н. Получение всего списка задач с неправильными параметрами (присутствует тело в запросе GET)
+    7н. Получение одной записи с неправильным id (добавочный URL: 0, -1, maxInteger, double, boolean, String, "", " ")
+    8н. Получение одной задачи по id с неправильными параметрами (присутствует тело в запросе GET)
     */
 
 @DisplayName("Тесты контракта: ")
@@ -130,6 +130,14 @@ public class ToDoContractTest {
         HttpPatch httpPatch = new HttpPatch(URL + "/" + id);
         HttpResponse response = client.execute(httpPatch);
         assertEquals(404, response.getStatusLine().getStatusCode());
+    }
+
+    @ParameterizedTest(name = "Номер заказа = {0}")
+    @MethodSource("getWrongOrders")
+    @Tag("Negative")
+    @DisplayName("1н. Отказ в создание задачи (скрипт, без тела)")
+    public void tes(int i) {
+
     }
 
     private static String[] getWrongIdSc400() {

@@ -290,15 +290,6 @@ public class ToDoBusinessTest {
     //Негативные тесты
     //-----------------------------------------------------------------------------------------------------------------
 
-    @ParameterizedTest(name = "Номер заказа = {0}")
-    @MethodSource("getWrongOrders")
-    @Tag("Negative")
-    @DisplayName("1н. Отказ в создание задачи (скрипт, без тела)")
-    public void tes(int i) {
-
-    }
-
-
     private ToDoItem createTestTask1() throws IOException {
         // создать задачу
         CreateToDo todo = new CreateToDo();
