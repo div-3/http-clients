@@ -1,4 +1,6 @@
 import client.ToDoClient;
+import extentions.ListToDoProvider;
+import extentions.SingleToDoProvider;
 import model.CreateToDo;
 import model.ToDoItem;
 import org.apache.http.util.EntityUtils;
@@ -6,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import ru.inno.todo.apache.ToDoClientApache;
@@ -75,9 +78,10 @@ public class ToDoBusinessTest {
 
     @Test
     @Tag("Positive")
+    @ExtendWith(SingleToDoProvider.class)
     @DisplayName("2. Переименование задачи")
-    public void shouldRenameItemById() throws IOException {
-        ToDoItem item = createTestTask1();
+    public void shouldRenameItemById(ToDoItem item) throws IOException {
+//        ToDoItem item = createTestTask1();        //Теперь передаётся от SingleToDoProvider при запуске теста
 
         //Проверить, что задача с нужным именем создана
         assertEquals(TEST_TASK_1_TITLE, client.getById(item.getId()).getTitle());
@@ -88,14 +92,15 @@ public class ToDoBusinessTest {
         assertEquals(titleExpected, client.getById(item.getId()).getTitle());
 
         //Очистка от тестовых данных
-        deleteTestTask1();
+//        deleteTestTask1();        //Очищается автоматически через AfterEachCallback в SingleToDoProvider
     }
 
     @Test
     @Tag("Positive")
+    @ExtendWith(SingleToDoProvider.class)
     @DisplayName("3. Отметка задачи выполненной и невыполненной")
-    public void shouldMarkItemDoneById() throws IOException {
-        ToDoItem item = createTestTask1();
+    public void shouldMarkItemDoneById(ToDoItem item) throws IOException {
+//        ToDoItem item = createTestTask1();
 
         //Проверить, что задача с нужным именем создана и у неё completed = false
         assertEquals(TEST_TASK_1_TITLE, item.getTitle());
@@ -116,25 +121,20 @@ public class ToDoBusinessTest {
         assertFalse(item.isCompleted());
 
         //Очистка от тестовых данных
-        deleteTestTask1();
+//        deleteTestTask1();
     }
 
     @Test
     @Tag("Positive")
+    @ExtendWith(SingleToDoProvider.class)
     @DisplayName("4. Удаление одной задачи по id")
-    public void shouldDeleteItemByID() throws IOException {
+    public void shouldDeleteItemByID(ToDoItem item) throws IOException {
         // получить список задач
-        ToDoItem item = createTestTask1();
+//        ToDoItem item = createTestTask1();
         List<ToDoItem> listBefore = client.getAll();
-        for (ToDoItem i : listBefore) {
-            System.out.println(i.getTitle());
-        }
 
-        deleteTestTask1();
+        deleteTestTask(item.getId());
         List<ToDoItem> listAfter = client.getAll();
-        for (ToDoItem i : listAfter) {
-            System.out.println(i.getTitle());
-        }
 
         assertEquals(1, listBefore.size() - listAfter.size());
     }
@@ -167,16 +167,17 @@ public class ToDoBusinessTest {
 
     @Test
     @Tag("Positive")
+    @ExtendWith(ListToDoProvider.class)
     @DisplayName("6. Получение всего списка задач")
-    public void shouldGetAll() throws IOException {
+    public void shouldGetAll(@ToDoItemNumber(5) List<ToDoItem> listCreated005) throws IOException {     //Прочитать про аннотации переменных для ParameterResolver
         //Создаём 5 задач
         List<ToDoItem> listStart = client.getAll();
-        List<ToDoItem> listCreated = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            CreateToDo createToDo = new CreateToDo();
-            createToDo.setTitle("Задача " + i);
-            listCreated.add(i, client.create(createToDo));
-        }
+//        List<ToDoItem> listCreated005 = new ArrayList<>();
+//        for (int i = 0; i < 5; i++) {
+//            CreateToDo createToDo = new CreateToDo();
+//            createToDo.setTitle("Задача " + i);
+//            listCreated005.add(i, client.create(createToDo));
+//        }
 
         //Получение списка задач
         List<ToDoItem> listAsIs = client.getAll();
@@ -185,12 +186,12 @@ public class ToDoBusinessTest {
         assertEquals(5, listAsIs.size() - listStart.size());
 
         //Проверка, что все элементы массива созданных задач находятся в массиве полученных задач
-        assertTrue(listAsIs.containsAll(listCreated));
+        assertTrue(listAsIs.containsAll(listCreated005));
 
         //Удаление всех задач
-        for (int i = 0; i < listCreated.size(); i++) {
-            client.deleteById(listCreated.get(i).getId());
-        }
+//        for (int i = 0; i < listCreated005.size(); i++) {
+//            client.deleteById(listCreated005.get(i).getId());
+//        }
     }
 
     @Test
@@ -301,6 +302,9 @@ public class ToDoBusinessTest {
 
     private void deleteTestTask1() throws IOException {
         client.deleteById(testTask1Id);
+    }
+    private void deleteTestTask(int testTaskId) throws IOException {
+        client.deleteById(testTaskId);
     }
 
 }

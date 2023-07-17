@@ -79,7 +79,6 @@ public class ToDoClientApache implements ToDoClient {
         HttpPatch request = new HttpPatch(URL + "/" + id);
         ToDoItem item = getById(id);
         item.setTitle(newName);
-//        String body = mapper.writeValueAsString(item);
         String body = "{\"title\":\"" + newName + "\"}";
 
         StringEntity patchBody = new StringEntity(body, ContentType.APPLICATION_JSON);        //Установка типа запроса для Entity. Иначе получается неправильная кодировка.
@@ -94,7 +93,6 @@ public class ToDoClientApache implements ToDoClient {
     public ToDoItem markCompleted(int id, boolean completed) throws IOException {
         HttpPatch request = new HttpPatch(URL + "/" + id);
         ToDoItem item = getById(id);
-//        String body = mapper.writeValueAsString(item);
         String body = "{\"completed\":\"" + completed + "\"}";
 
         StringEntity patchBody = new StringEntity(body, ContentType.APPLICATION_JSON);        //Установка типа запроса для Entity. Иначе получается неправильная кодировка.
