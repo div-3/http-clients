@@ -26,7 +26,6 @@ public class ListToDoProvider implements ParameterResolver, AfterEachCallback {
     private final static String TITLE = "Задача 1";
     //    private int id;
     private List<ToDoItem> listCreated = new ArrayList<>();
-    private List<ToDoItem> listBefore;
     private int listSizeToCreate;
     boolean needToDeleteCreatedAfter;
 
@@ -53,19 +52,18 @@ public class ListToDoProvider implements ParameterResolver, AfterEachCallback {
     public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
             throws ParameterResolutionException {
         try {
-            listBefore = client.getAll();
             for (int i = 0; i < listSizeToCreate; i++) {
                 CreateToDo createToDo = new CreateToDo();
                 createToDo.setTitle("Задача " + i);
                 listCreated.add(i, client.create(createToDo));
             }
-//            return new ListToDoBeforeAndCreated(listBefore, listCreated);
             return listCreated;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
+    //AfterEach CallBack выполняется после каждого теста
     @Override
     public void afterEach(ExtensionContext extensionContext) throws Exception {
         if (needToDeleteCreatedAfter) {

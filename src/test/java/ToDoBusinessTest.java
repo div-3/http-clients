@@ -38,7 +38,6 @@ public class ToDoBusinessTest {
     */
     private ToDoClient client;
     private final String TEST_TASK_1_TITLE = "Задача 0";
-    private int testTask1Id;
 
     @BeforeEach
     public void setUp() throws IOException {
@@ -52,13 +51,12 @@ public class ToDoBusinessTest {
     public void shouldCreateTask(List<ToDoItem> listBefore, @ToDoItemNumber List<ToDoItem> items) throws IOException {
         // получить список задач
         ToDoItem item = items.get(0);
-        String title = "Задача 0";
 
         // проверить, что задача отображается в списке
         assertFalse(item.getUrl().isBlank());
         assertFalse(item.isCompleted());
         assertTrue(item.getId() > 0);
-        assertEquals(title, item.getTitle());
+        assertEquals(TEST_TASK_1_TITLE, item.getTitle());
         // TODO: bug report. Oreder is null
         assertEquals(0, item.getOrder());
         // задач стало на 1 больше
@@ -67,7 +65,7 @@ public class ToDoBusinessTest {
 
         // проверить еще и по id
         ToDoItem single = client.getById(item.getId());
-        assertEquals(title, single.getTitle());
+        assertEquals(TEST_TASK_1_TITLE, single.getTitle());
 
         //Очистка от тестовых данных
 //        deleteTestTask1();    //Очищается автоматически через AfterEachCallback в ListToDoProvider
@@ -205,10 +203,12 @@ public class ToDoBusinessTest {
 
     @Test
     @Tag("Positive")
+    @ExtendWith(ListToDoProvider.class)
     @DisplayName("8. Создание дубликата задачи")
-    public void shouldCreateDuplicateItem() throws IOException {
-        ToDoItem item1 = createTestTask1();
-        ToDoItem item2 = createTestTask1();
+    public void shouldCreateDuplicateItem(@ToDoItemNumber List<ToDoItem> items1,
+                                          @ToDoItemNumber List<ToDoItem> items2) throws IOException {
+        ToDoItem item1 = items1.get(0);
+        ToDoItem item2 = items1.get(1);
 
         // проверить, что у задачи 1 и задачи 2 совпадают: title, order, completed
         assertNotEquals(item1.getId(), item2.getId());
@@ -222,7 +222,8 @@ public class ToDoBusinessTest {
     @Tag("Positive")
     @ExtendWith({ListToDoItemsBeforeProvider.class, ListToDoProvider.class})
     @DisplayName("9. Добавление 50 задач")
-    public void shouldCreate50Item(List<ToDoItem> listStart, @ToDoItemNumber(count = 50) List<ToDoItem> listCreated) throws IOException {
+    public void shouldCreate50Item(List<ToDoItem> listStart,
+                                   @ToDoItemNumber(count = 50) List<ToDoItem> listCreated) throws IOException {
 
         //Получение списка задач
         List<ToDoItem> listAsIs = client.getAll();
@@ -271,19 +272,6 @@ public class ToDoBusinessTest {
     //-----------------------------------------------------------------------------------------------------------------
     //Негативные тесты
     //-----------------------------------------------------------------------------------------------------------------
-
-    private ToDoItem createTestTask1() throws IOException {
-        // создать задачу
-        CreateToDo todo = new CreateToDo();
-        todo.setTitle(TEST_TASK_1_TITLE);
-        ToDoItem item = client.create(todo);
-        testTask1Id = item.getId();
-        return item;
-    }
-
-    private void deleteTestTask1() throws IOException {
-        client.deleteById(testTask1Id);
-    }
 
     private void deleteTestTask(int testTaskId) throws IOException {
         client.deleteById(testTaskId);
