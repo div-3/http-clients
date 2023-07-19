@@ -171,8 +171,8 @@ public class ToDoBusinessTest {
     @ExtendWith(ListToDoItemsBeforeProvider.class)
     @ExtendWith(ListToDoProvider.class)
     @DisplayName("6. Получение всего списка задач")
-    public void shouldGetAll(List<ToDoItem> listBefore, @ToDoItemNumber(count = 5) List<ToDoItem> listCreated)
-            throws IOException {
+    public void shouldGetAll(List<ToDoItem> listBefore,
+                             @ToDoItemNumber(count = 5) List<ToDoItem> listCreated) throws IOException {
 
         //Получение списка задач
         List<ToDoItem> listAsIs = client.getAll();
@@ -206,7 +206,7 @@ public class ToDoBusinessTest {
     @ExtendWith(ListToDoProvider.class)
     @DisplayName("8. Создание дубликата задачи")
     public void shouldCreateDuplicateItem(@ToDoItemNumber List<ToDoItem> items1,
-                                          @ToDoItemNumber List<ToDoItem> items2) throws IOException {
+                                          @ToDoItemNumber List<ToDoItem> items2) {
         ToDoItem item1 = items1.get(0);
         ToDoItem item2 = items1.get(1);
 
